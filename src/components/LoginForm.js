@@ -7,7 +7,6 @@ import {
   deriveKeyFromPassword,
   verifyMasterPassword,
   setDerivedKey,
-  initArgon2,
 } from '@/lib/encryption';
 
 export default function LoginForm({ userId }) {
@@ -15,43 +14,15 @@ export default function LoginForm({ userId }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isArgon2Ready, setIsArgon2Ready] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-
-    async function prepareArgon2() {
-      try {
-        const initialized = await initArgon2();
-        setIsArgon2Ready(initialized);
-        if (!initialized) {
-          setError(
-            'Failed to initialize encryption library. Please refresh the page.',
-          );
-        }
-      } catch (err) {
-        console.error('Failed to initialize Argon2:', err);
-        setError(
-          'Failed to initialize encryption library. Please refresh the page.',
-        );
-      }
-    }
-
-    if (typeof window !== 'undefined') {
-      prepareArgon2();
-    }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!isArgon2Ready) {
-      setError('Encryption library is not ready. Please refresh the page.');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -111,7 +82,7 @@ export default function LoginForm({ userId }) {
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <button type="submit" disabled={isLoading || !isArgon2Ready}>
+        <button type="submit" disabled={isLoading}>
           {isLoading ? 'Unlocking...' : 'Unlock'}
         </button>
       </form>

@@ -8,7 +8,6 @@ import {
   deriveKeyFromPassword,
   createVerificationBlob,
   setDerivedKey,
-  initArgon2,
 } from '@/lib/encryption';
 
 export default function MasterPasswordSetup({ userId }) {
@@ -17,33 +16,11 @@ export default function MasterPasswordSetup({ userId }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isArgon2Ready, setIsArgon2Ready] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-
-    async function prepareArgon2() {
-      try {
-        const initialized = await initArgon2();
-        setIsArgon2Ready(initialized);
-        if (!initialized) {
-          setError(
-            'Failed to initialize encryption library. Please refresh the page.',
-          );
-        }
-      } catch (err) {
-        console.error('Failed to initialize Argon2:', err);
-        setError(
-          'Failed to initialize encryption library. Please refresh the page.',
-        );
-      }
-    }
-
-    if (typeof window !== 'undefined') {
-      prepareArgon2();
-    }
   }, []);
 
   // Function to calculate password strength
@@ -70,11 +47,6 @@ export default function MasterPasswordSetup({ userId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!isArgon2Ready) {
-      setError('Encryption library is not ready. Please refresh the page.');
-      return;
-    }
 
     // Validate passwords
     if (password !== confirmPassword) {
@@ -190,7 +162,7 @@ export default function MasterPasswordSetup({ userId }) {
           </p>
         </div>
 
-        <button type="submit" disabled={isLoading || !isArgon2Ready}>
+        <button type="submit" disabled={isLoading}>
           {isLoading ? 'Setting up...' : 'Set Master Password'}
         </button>
       </form>

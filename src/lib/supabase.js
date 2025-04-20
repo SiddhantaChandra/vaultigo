@@ -5,22 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // Use environment variables if available, otherwise use placeholders
 // You'll need to add these to your .env.local file
-const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
-
-// Only show warning in browser environment
-if (
-  typeof window !== 'undefined' &&
-  (supabaseUrl === 'https://your-project.supabase.co' ||
-    supabaseAnonKey === 'your-anon-key')
-) {
-  console.warn(
-    'Missing Supabase environment variables. Using placeholder values.',
-    'Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.',
-  );
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -28,25 +14,60 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // User key operations
 export async function saveUserKey(userId, salt, verification) {
-  return supabase
-    .from('user_keys')
-    .upsert({ user_id: userId, salt, verification })
-    .select();
+  console.log('Attempting to save user key for userId:', userId);
+
+  try {
+    const { data, error } = await supabase
+      .from('user_keys')
+      .upsert({ user_id: userId, salt, verification })
+      .select();
+
+    if (error) {
+      console.error('Error saving user key:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      throw error;
+    }
+
+    console.log('Successfully saved user key');
+    return data;
+  } catch (exception) {
+    console.error('Exception in saveUserKey:', exception);
+    throw exception;
+  }
 }
 
 export async function getUserKey(userId) {
-  const { data, error } = await supabase
-    .from('user_keys')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (error) {
-    console.error('Error fetching user key:', error);
+  if (!userId) {
+    console.error('getUserKey was called with invalid userId:', userId);
     return null;
   }
 
-  return data;
+  try {
+    console.log('Attempting to fetch user key for userId:', userId);
+
+    const { data, error } = await supabase
+      .from('user_keys')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user key:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      return null;
+    }
+
+    if (!data) {
+      console.log('No user key found for userId:', userId);
+      return null;
+    }
+
+    console.log('Successfully retrieved user key');
+    return data;
+  } catch (exception) {
+    console.error('Exception in getUserKey:', exception);
+    return null;
+  }
 }
 
 // Password entry operations

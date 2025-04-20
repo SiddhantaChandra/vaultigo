@@ -3,31 +3,11 @@
 
 import CryptoJS from 'crypto-js';
 
-// Store Argon2 instance
-let argon2 = null;
-
 // Constants
 const VERIFICATION_TEXT = 'vaultigo-verify-me';
 const SALT_BYTES = 16;
-
-// Initialize argon2 - call this from components that need it
-export async function initArgon2() {
-  if (typeof window === 'undefined') {
-    return false; // Server-side, no initialization
-  }
-
-  // Only load if not already loaded
-  if (!argon2) {
-    try {
-      argon2 = await import('argon2-browser');
-      return true;
-    } catch (error) {
-      console.error('Failed to load argon2-browser:', error);
-      return false;
-    }
-  }
-  return true;
-}
+const PBKDF2_ITERATIONS = 100000; // High iteration count for security
+const KEY_SIZE = 256 / 32; // 256 bits in words
 
 // Generate a random salt
 export function generateSalt() {
@@ -42,36 +22,23 @@ export function generateSalt() {
   );
 }
 
-// Derive encryption key from master password using Argon2
+// Derive encryption key from master password using PBKDF2
 export async function deriveKeyFromPassword(password, salt) {
   if (typeof window === 'undefined') {
     return ''; // Server-side placeholder
   }
 
-  // Make sure argon2 is initialized
-  const isInitialized = await initArgon2();
-  if (!isInitialized || !argon2) {
-    throw new Error('Argon2 failed to initialize');
-  }
-
   try {
-    // Convert hex salt to Uint8Array
-    const saltArray = new Uint8Array(
-      salt.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)),
-    );
-
-    const result = await argon2.hash({
-      pass: password,
-      salt: saltArray,
-      time: 4, // Number of iterations
-      mem: 16384, // 16 MiB
-      parallelism: 2, // Degree of parallelism
-      hashLen: 32, // 32 bytes = 256 bits
-      type: argon2.ArgonType.Argon2id,
+    // PBKDF2 is a password-based key derivation function
+    // It's slower than plain hashing, which is good for security
+    const key = CryptoJS.PBKDF2(password, salt, {
+      keySize: KEY_SIZE,
+      iterations: PBKDF2_ITERATIONS,
+      hasher: CryptoJS.algo.SHA256,
     });
 
-    // Return the hash as a hex string
-    return result.hashHex;
+    // Return the key as a hex string
+    return key.toString();
   } catch (error) {
     console.error('Error in key derivation:', error);
     throw new Error('Failed to derive encryption key');
@@ -151,4 +118,9 @@ export function getDerivedKey() {
 // Clear the derived key from memory
 export function clearDerivedKey() {
   currentDerivedKey = null;
+}
+
+// For compatibility with the rest of your code
+export async function initArgon2() {
+  return true; // We're not using Argon2 anymore
 }
