@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
             <h1>Vaultigo</h1>
             <p>Secure Password Manager</p>
           </header>
-          <main>LOL</main>
+          <main>{children}</main>
           <footer>
             <p>Vaultigo Password Manager - Client-side Encryption</p>
           </footer>

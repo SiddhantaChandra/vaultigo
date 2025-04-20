@@ -3,23 +3,31 @@
 
 import CryptoJS from 'crypto-js';
 
-// Dynamically import argon2-browser to avoid server-side issues
-let argon2;
-if (typeof window !== 'undefined') {
-  // We're in the browser
-  import('argon2-browser').then((module) => {
-    argon2 = module;
-  });
-}
+// Store Argon2 instance
+let argon2 = null;
 
 // Constants
 const VERIFICATION_TEXT = 'vaultigo-verify-me';
 const SALT_BYTES = 16;
-const ARGON2_OPTIONS = {
-  timeCost: 4, // Number of iterations
-  memoryCost: 16384, // 16 MiB
-  parallelism: 2, // Degree of parallelism
-};
+
+// Initialize argon2 - call this from components that need it
+export async function initArgon2() {
+  if (typeof window === 'undefined') {
+    return false; // Server-side, no initialization
+  }
+
+  // Only load if not already loaded
+  if (!argon2) {
+    try {
+      argon2 = await import('argon2-browser');
+      return true;
+    } catch (error) {
+      console.error('Failed to load argon2-browser:', error);
+      return false;
+    }
+  }
+  return true;
+}
 
 // Generate a random salt
 export function generateSalt() {
@@ -36,8 +44,14 @@ export function generateSalt() {
 
 // Derive encryption key from master password using Argon2
 export async function deriveKeyFromPassword(password, salt) {
-  if (typeof window === 'undefined' || !argon2) {
+  if (typeof window === 'undefined') {
     return ''; // Server-side placeholder
+  }
+
+  // Make sure argon2 is initialized
+  const isInitialized = await initArgon2();
+  if (!isInitialized || !argon2) {
+    throw new Error('Argon2 failed to initialize');
   }
 
   try {
@@ -49,7 +63,10 @@ export async function deriveKeyFromPassword(password, salt) {
     const result = await argon2.hash({
       pass: password,
       salt: saltArray,
-      ...ARGON2_OPTIONS,
+      time: 4, // Number of iterations
+      mem: 16384, // 16 MiB
+      parallelism: 2, // Degree of parallelism
+      hashLen: 32, // 32 bytes = 256 bits
       type: argon2.ArgonType.Argon2id,
     });
 
@@ -62,7 +79,7 @@ export async function deriveKeyFromPassword(password, salt) {
 }
 
 // Create verification blob to verify master password
-export async function createVerificationBlob(derivedKey) {
+export function createVerificationBlob(derivedKey) {
   try {
     // Encrypt a known text with the derived key
     const encrypted = CryptoJS.AES.encrypt(
@@ -78,7 +95,7 @@ export async function createVerificationBlob(derivedKey) {
 }
 
 // Verify the master password
-export async function verifyMasterPassword(derivedKey, verificationBlob) {
+export function verifyMasterPassword(derivedKey, verificationBlob) {
   try {
     // Try to decrypt the verification blob
     const decrypted = CryptoJS.AES.decrypt(

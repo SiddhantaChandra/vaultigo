@@ -3,12 +3,22 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// Use environment variables if available, otherwise use placeholders
+// You'll need to add these to your .env.local file
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
 
-if (typeof window !== 'undefined' && (!supabaseUrl || !supabaseAnonKey)) {
-  console.error(
-    'Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.',
+// Only show warning in browser environment
+if (
+  typeof window !== 'undefined' &&
+  (supabaseUrl === 'https://your-project.supabase.co' ||
+    supabaseAnonKey === 'your-anon-key')
+) {
+  console.warn(
+    'Missing Supabase environment variables. Using placeholder values.',
+    'Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.',
   );
 }
 

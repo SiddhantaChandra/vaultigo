@@ -8,6 +8,7 @@ import {
   deriveKeyFromPassword,
   createVerificationBlob,
   setDerivedKey,
+  initArgon2,
 } from '@/lib/encryption';
 
 export default function MasterPasswordSetup({ userId }) {
@@ -16,11 +17,33 @@ export default function MasterPasswordSetup({ userId }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isArgon2Ready, setIsArgon2Ready] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+
+    async function prepareArgon2() {
+      try {
+        const initialized = await initArgon2();
+        setIsArgon2Ready(initialized);
+        if (!initialized) {
+          setError(
+            'Failed to initialize encryption library. Please refresh the page.',
+          );
+        }
+      } catch (err) {
+        console.error('Failed to initialize Argon2:', err);
+        setError(
+          'Failed to initialize encryption library. Please refresh the page.',
+        );
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      prepareArgon2();
+    }
   }, []);
 
   // Function to calculate password strength
@@ -47,6 +70,11 @@ export default function MasterPasswordSetup({ userId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isArgon2Ready) {
+      setError('Encryption library is not ready. Please refresh the page.');
+      return;
+    }
 
     // Validate passwords
     if (password !== confirmPassword) {
@@ -76,7 +104,7 @@ export default function MasterPasswordSetup({ userId }) {
       const derivedKey = await deriveKeyFromPassword(password, salt);
 
       // Create verification blob
-      const verification = await createVerificationBlob(derivedKey);
+      const verification = createVerificationBlob(derivedKey);
 
       // Save salt and verification blob to Supabase
       await saveUserKey(userId, salt, verification);
@@ -123,7 +151,17 @@ export default function MasterPasswordSetup({ userId }) {
               <p>Password Strength: {getStrengthLabel()}</p>
               <div>
                 <div
-                  style={{ width: `${(passwordStrength / 6) * 100}%` }}
+                  style={{
+                    width: `${(passwordStrength / 6) * 100}%`,
+                    height: '8px',
+                    backgroundColor:
+                      passwordStrength <= 2
+                        ? 'red'
+                        : passwordStrength <= 4
+                        ? 'orange'
+                        : 'green',
+                    borderRadius: '4px',
+                  }}
                 ></div>
               </div>
             </div>
@@ -142,7 +180,7 @@ export default function MasterPasswordSetup({ userId }) {
           />
         </div>
 
-        {error && <p>{error}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
         <div>
           <p>
@@ -152,7 +190,7 @@ export default function MasterPasswordSetup({ userId }) {
           </p>
         </div>
 
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading || !isArgon2Ready}>
           {isLoading ? 'Setting up...' : 'Set Master Password'}
         </button>
       </form>
