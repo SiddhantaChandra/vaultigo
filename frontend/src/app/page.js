@@ -59,9 +59,9 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <div>
-        <h2>Welcome to Vaultigo</h2>
+    <div className="pt-8">
+      <div className="flex flex-col items-center">
+        <h2 className="text-lg font-bold">Welcome to Vaultigo</h2>
         <p>Your secure, client-side encrypted password manager</p>
 
         {isNewUser ? (

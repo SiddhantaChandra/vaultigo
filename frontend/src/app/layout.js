@@ -1,4 +1,6 @@
 import '@/styles/globals.css';
+import Image from 'next/image';
+import LogoWhie from '@/../public/logo-t-white.webp';
 
 export const metadata = {
   title: 'Vaultigo Password Manager',
@@ -8,16 +10,18 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <div>
-          <header>
-            <h1>Vaultigo</h1>
-            <p>Secure Password Manager</p>
+      <body className="pt-24">
+        <div className="grow-1 flex flex-col justify-center items-center">
+          <header className="">
+            <Image
+              src={LogoWhie}
+              alt="Vaultigo Logo"
+              width={250}
+              height={200}
+              priority
+            />
           </header>
           <main>{children}</main>
-          <footer>
-            <p>Vaultigo Password Manager - Client-side Encryption</p>
-          </footer>
         </div>
       </body>
     </html>
