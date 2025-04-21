@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
+import ImportExportPasswords from '@/components/ImportExportPasswords';
 import { getAnonymousId } from '@/lib/supabase';
 import { getDerivedKey, clearDerivedKey } from '@/lib/encryption';
 
@@ -100,28 +101,8 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <section>
-          <h2>Data</h2>
-          <div>
-            <h3>Export Passwords</h3>
-            <p>Export your passwords as an encrypted file.</p>
-            <button
-              onClick={() => alert('This feature is not yet implemented.')}
-            >
-              Export Data
-            </button>
-          </div>
-
-          <div>
-            <h3>Import Passwords</h3>
-            <p>Import passwords from a file or another password manager.</p>
-            <button
-              onClick={() => alert('This feature is not yet implemented.')}
-            >
-              Import Data
-            </button>
-          </div>
-        </section>
+        {/* Add our new Import/Export component */}
+        <ImportExportPasswords />
 
         <section>
           <h2>Danger Zone</h2>

@@ -101,6 +101,10 @@ export default function Dashboard() {
     router.push('/');
   };
 
+  const goToImportExport = () => {
+    router.push('/settings');
+  };
+
   if (!isClient) {
     return null;
   }
@@ -124,12 +128,25 @@ export default function Dashboard() {
             <div>
               <h3>Your Saved Passwords</h3>
               {passwords.length === 0 ? (
-                <p>No passwords saved yet. Add your first password below.</p>
+                <div>
+                  <p>
+                    No passwords saved yet. Add your first password below or
+                    import existing passwords.
+                  </p>
+                  <button onClick={goToImportExport}>Import Passwords</button>
+                </div>
               ) : (
-                <PasswordList
-                  passwords={passwords}
-                  onDelete={handleDeletePassword}
-                />
+                <div>
+                  <PasswordList
+                    passwords={passwords}
+                    onDelete={handleDeletePassword}
+                  />
+                  <div>
+                    <button onClick={goToImportExport}>
+                      Import/Export Passwords
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
