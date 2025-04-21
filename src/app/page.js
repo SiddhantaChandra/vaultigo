@@ -22,7 +22,6 @@ export default function Home() {
 
     async function checkExistingUser() {
       try {
-        // Get anonymous ID or create one
         let userIdentifier = getAnonymousId();
 
         if (!userIdentifier) {
@@ -31,14 +30,11 @@ export default function Home() {
 
         setUserId(userIdentifier);
 
-        // Check if user has already set up a master password
         const userKey = await getUserKey(userIdentifier);
 
         if (userKey) {
-          // User exists, show login form
           setIsNewUser(false);
         } else {
-          // New user, show master password setup
           setIsNewUser(true);
         }
 

@@ -3,11 +3,13 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Use environment variables if available, otherwise use placeholders
-// You'll need to add these to your .env.local file
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Use environment variables or hardcoded values for development
+// In production, use environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL';
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
 
+// Create a single instance of the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Helper functions for database operations
@@ -17,10 +19,35 @@ export async function saveUserKey(userId, salt, verification) {
   console.log('Attempting to save user key for userId:', userId);
 
   try {
-    const { data, error } = await supabase
+    // First, check if a record already exists
+    const { data: existingData, error: checkError } = await supabase
       .from('user_keys')
-      .upsert({ user_id: userId, salt, verification })
-      .select();
+      .select('*')
+      .eq('user_id', userId);
+
+    if (checkError) {
+      console.error('Error checking for existing user key:', checkError);
+      throw checkError;
+    }
+
+    let result;
+
+    if (existingData && existingData.length > 0) {
+      // Update existing record
+      result = await supabase
+        .from('user_keys')
+        .update({ salt, verification })
+        .eq('user_id', userId)
+        .select();
+    } else {
+      // Insert new record
+      result = await supabase
+        .from('user_keys')
+        .insert({ user_id: userId, salt, verification })
+        .select();
+    }
+
+    const { data, error } = result;
 
     if (error) {
       console.error('Error saving user key:', error);
@@ -45,11 +72,11 @@ export async function getUserKey(userId) {
   try {
     console.log('Attempting to fetch user key for userId:', userId);
 
+    // Get all matching records first
     const { data, error } = await supabase
       .from('user_keys')
       .select('*')
-      .eq('user_id', userId)
-      .single();
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error fetching user key:', error);
@@ -57,13 +84,14 @@ export async function getUserKey(userId) {
       return null;
     }
 
-    if (!data) {
+    if (!data || data.length === 0) {
       console.log('No user key found for userId:', userId);
       return null;
     }
 
+    // Return the first record (there should be only one)
     console.log('Successfully retrieved user key');
-    return data;
+    return data[0];
   } catch (exception) {
     console.error('Exception in getUserKey:', exception);
     return null;

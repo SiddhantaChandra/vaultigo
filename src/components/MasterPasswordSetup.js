@@ -23,9 +23,7 @@ export default function MasterPasswordSetup({ userId }) {
     setIsClient(true);
   }, []);
 
-  // Function to calculate password strength
   const evaluatePasswordStrength = (pass) => {
-    // Simple password strength evaluation
     let strength = 0;
 
     if (pass.length >= 8) strength += 1;
@@ -48,7 +46,6 @@ export default function MasterPasswordSetup({ userId }) {
     e.preventDefault();
     setError('');
 
-    // Validate passwords
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -69,26 +66,31 @@ export default function MasterPasswordSetup({ userId }) {
     setIsLoading(true);
 
     try {
-      // Generate a new salt
+      console.log('Starting master password setup for user:', userId);
+
       const salt = generateSalt();
+      console.log('Generated salt');
 
-      // Derive key from password
       const derivedKey = await deriveKeyFromPassword(password, salt);
+      console.log('Derived key successfully');
 
-      // Create verification blob
       const verification = createVerificationBlob(derivedKey);
+      console.log('Created verification blob');
 
-      // Save salt and verification blob to Supabase
-      await saveUserKey(userId, salt, verification);
+      console.log('Attempting to save user key to Supabase');
+      const result = await saveUserKey(userId, salt, verification);
+      console.log('Save result:', result);
 
-      // Store the derived key in memory
       setDerivedKey(derivedKey);
+      console.log('Stored derived key in memory');
 
-      // Navigate to dashboard
+      console.log('Navigating to dashboard');
       router.push('/dashboard');
     } catch (error) {
       console.error('Setup error:', error);
-      setError('An error occurred during setup. Please try again.');
+      setError(
+        `An error occurred during setup: ${error.message || 'Unknown error'}`,
+      );
     } finally {
       setIsLoading(false);
     }

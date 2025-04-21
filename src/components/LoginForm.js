@@ -26,7 +26,8 @@ export default function LoginForm({ userId }) {
     setIsLoading(true);
 
     try {
-      // Get user's salt and verification blob from Supabase
+      console.log('Attempting login for user:', userId);
+
       const userKey = await getUserKey(userId);
 
       if (!userKey) {
@@ -36,32 +37,32 @@ export default function LoginForm({ userId }) {
       }
 
       const { salt, verification } = userKey;
+      console.log('Retrieved salt and verification');
 
-      // Derive key from password using the stored salt
       const derivedKey = await deriveKeyFromPassword(password, salt);
+      console.log('Derived key from password');
 
-      // Verify the master password
       const isValid = verifyMasterPassword(derivedKey, verification);
+      console.log('Password verification result:', isValid);
 
       if (isValid) {
-        // If valid, store the derived key in memory
         setDerivedKey(derivedKey);
+        console.log('Password verified, setting derived key');
 
-        // Navigate to dashboard
         router.push('/dashboard');
       } else {
         setError('Incorrect master password. Please try again.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('An error occurred during login. Please try again.');
+      setError(`Login error: ${error.message || 'Please try again'}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   if (!isClient) {
-    return null; // Return nothing during SSR
+    return null;
   }
 
   return (

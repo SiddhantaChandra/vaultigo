@@ -41,7 +41,6 @@ export default function AddPasswordForm({ onAdd, onCancel, userId }) {
     setIsLoading(true);
 
     try {
-      // Get derived key from memory
       const derivedKey = getDerivedKey();
 
       if (!derivedKey) {
@@ -49,7 +48,6 @@ export default function AddPasswordForm({ onAdd, onCancel, userId }) {
         return;
       }
 
-      // Create password data object
       const passwordData = {
         username: formData.username,
         password: formData.password,
@@ -57,10 +55,8 @@ export default function AddPasswordForm({ onAdd, onCancel, userId }) {
         createdAt: new Date().toISOString(),
       };
 
-      // Encrypt the password data
       const encrypted = encryptPasswordEntry(passwordData, derivedKey);
 
-      // Save to Supabase
       const { data, error } = await savePasswordEntry(
         userId,
         formData.website,
@@ -69,7 +65,6 @@ export default function AddPasswordForm({ onAdd, onCancel, userId }) {
 
       if (error) throw error;
 
-      // Add the new password to the list
       onAdd({
         id: data[0].id,
         website: formData.website,
@@ -94,24 +89,21 @@ export default function AddPasswordForm({ onAdd, onCancel, userId }) {
   const generateRandomPassword = () => {
     if (!isClient) return;
 
-    const length = 16; // Default length
+    const length = 16;
     const charset =
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
     let password = '';
 
-    // Ensure at least one of each character type
     password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
     password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
     password += '0123456789'[Math.floor(Math.random() * 10)];
     password += '!@#$%^&*()-_=+'[Math.floor(Math.random() * 14)];
 
-    // Fill the rest randomly
     for (let i = 4; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
     }
 
-    // Shuffle the password
     password = password
       .split('')
       .sort(() => 0.5 - Math.random())
