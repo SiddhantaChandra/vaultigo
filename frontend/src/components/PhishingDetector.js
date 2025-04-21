@@ -11,6 +11,7 @@ import {
   getThreatLevelDescription,
   getSafetyRecommendations,
 } from '@/lib/api';
+import SAPVerification from './SAPVerification';
 
 export default function PhishingDetector() {
   const [emailSender, setEmailSender] = useState('');
@@ -478,83 +479,21 @@ export default function PhishingDetector() {
                     <p className="text-text-secondary">
                       {getThreatLevelDescription(result.threatLevel)}
                     </p>
+
+                    {/* Display if the result contains SAP verification info */}
+                    {result.sapVerification && (
+                      <div className="mt-1 text-xs">
+                        {result.sapVerification.is_trusted ? (
+                          <span className="text-green-400 font-medium">
+                            ✓ Verified SAP Business Partner
+                          </span>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
             })()}
-
-            {result.susWords && result.susWords.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-text-primary font-medium mb-2">
-                  Suspicious Words/Phrases Detected:
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {result.susWords.map((word, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-yellow-400/10 text-yellow-300 text-xs font-medium rounded-full"
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="bg-dark-elevated p-4 rounded-md border border-dark-border mb-4">
-              <h4 className="text-text-primary font-medium mb-2">
-                Safety Recommendations:
-              </h4>
-              <ul className="space-y-2 text-text-secondary">
-                {getSafetyRecommendations(result.threatLevel).map(
-                  (tip, index) => (
-                    <li key={index} className="flex items-start">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-purple-400 mr-2 flex-shrink-0"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span>{tip}</span>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </div>
-
-            {!result.isPhishing &&
-              result.susWords &&
-              result.susWords.length > 0 && (
-                <div className="bg-blue-900/20 border border-blue-800 text-blue-200 px-4 py-3 rounded-md">
-                  <h4 className="font-medium flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 mr-2"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Note:
-                  </h4>
-                  <p className="mt-1 text-sm">
-                    Although the email appears safe, it contains some
-                    potentially suspicious words or phrases. Always exercise
-                    caution when dealing with emails containing sensitive
-                    information.
-                  </p>
-                </div>
-              )}
           </div>
         </div>
       )}

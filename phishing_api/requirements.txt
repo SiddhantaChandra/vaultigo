@@ -4,3 +4,6 @@ pydantic
 scikit-learn
 joblib
 starlette
+requests
+python-dotenv
+PyJWT  

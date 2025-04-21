@@ -1,7 +1,3 @@
-'use client';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 /**
  * Check if an email is a potential phishing attempt
  * @param {string} emailSender - The sender's email address
@@ -33,6 +29,7 @@ export async function checkPhishingEmail(emailSender, emailBody) {
       threatLevel: data.status, // good, sus, bad
       susWords: data.suswords || [],
       isPhishing: data.status === 'sus' || data.status === 'bad',
+      sapVerification: data.sap_verification || null,
       rawResponse: data,
     };
   } catch (error) {
@@ -42,56 +39,75 @@ export async function checkPhishingEmail(emailSender, emailBody) {
 }
 
 /**
- * Get a readable description for a threat level
- * @param {string} threatLevel - The threat level ('good', 'sus', 'bad')
- * @returns {string} - Human-readable description
+ * Verify if an email belongs to a trusted SAP business partner
+ * @param {string} email - The email address to verify
+ * @returns {Promise<Object>} - The verification result
  */
-export function getThreatLevelDescription(threatLevel) {
-  switch (threatLevel) {
-    case 'good':
-      return 'This email appears to be safe.';
-    case 'sus':
-      return 'This email contains suspicious elements and may be a phishing attempt.';
-    case 'bad':
-      return 'This email is likely a phishing attempt. Exercise extreme caution.';
-    default:
-      return 'Unable to determine the threat level of this email.';
+export async function verifySAPBusinessPartner(email) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sap/verify-email/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API error (${response.status}): ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in verifySAPBusinessPartner:', error);
+    throw error;
   }
 }
 
 /**
- * Get safety recommendations based on threat level
- * @param {string} threatLevel - The threat level ('good', 'sus', 'bad')
- * @returns {string[]}
+ * Verify multiple email addresses against SAP business partners database
+ * @param {string[]} emails - Array of email addresses to verify
+ * @returns {Promise<Object[]>} - Array of verification results
  */
-export function getSafetyRecommendations(threatLevel) {
-  const baseRecommendations = [
-    'Never click on suspicious links in emails',
-    'Do not provide personal information or credentials via email',
-    'Be careful with attachments from unknown senders',
-  ];
+export async function verifyMultipleSAPPartners(emails) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sap/verify-emails/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ emails }),
+    });
 
-  if (threatLevel === 'good') {
-    return ['Always stay vigilant, even when emails appear legitimate.'];
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API error (${response.status}): ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in verifyMultipleSAPPartners:', error);
+    throw error;
   }
+}
 
-  if (threatLevel === 'sus') {
-    return [
-      ...baseRecommendations,
-      'Verify the sender by contacting them through official channels',
-      'Check the actual email address of the sender, not just the display name',
-    ];
+/**
+ * Check the status of SAP integration
+ * @returns {Promise<Object>} - Status information
+ */
+export async function getSAPStatus() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sap/status/`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API error (${response.status}): ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in getSAPStatus:', error);
+    throw error;
   }
-
-  if (threatLevel === 'bad') {
-    return [
-      ...baseRecommendations,
-      'Report this email as phishing to your IT department or email provider',
-      'Delete the email immediately',
-      "If you've clicked any links or provided information, change your passwords immediately",
-      'Monitor your accounts for any suspicious activity',
-    ];
-  }
-
-  return baseRecommendations;
 }

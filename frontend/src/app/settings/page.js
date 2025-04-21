@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import ImportExportPasswords from '@/components/ImportExportPasswords';
 import BreachCheck from '@/components/BreachCheck';
+import SAPSettings from '@/components/SAPSettings';
 import { getAnonymousId } from '@/lib/supabase';
 import { getDerivedKey, clearDerivedKey } from '@/lib/encryption';
 
@@ -134,45 +135,6 @@ export default function SettingsPage() {
         <div className="mb-6 border-b border-dark-border">
           <div className="flex space-x-1 overflow-x-auto">
             <button
-              onClick={() => setActiveTab('account')}
-              className={`relative pb-3 px-4 text-sm font-medium ${
-                activeTab === 'account'
-                  ? 'text-text-accent'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Account
-              {activeTab === 'account' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-gradient"></span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('security')}
-              className={`relative pb-3 px-4 text-sm font-medium ${
-                activeTab === 'security'
-                  ? 'text-text-accent'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Security
-              {activeTab === 'security' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-gradient"></span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('import-export')}
-              className={`relative pb-3 px-4 text-sm font-medium ${
-                activeTab === 'import-export'
-                  ? 'text-text-accent'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Import & Export
-              {activeTab === 'import-export' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-gradient"></span>
-              )}
-            </button>
-            <button
               onClick={() => setActiveTab('breach-check')}
               className={`relative pb-3 px-4 text-sm font-medium ${
                 activeTab === 'breach-check'
@@ -182,6 +144,19 @@ export default function SettingsPage() {
             >
               Breach Check
               {activeTab === 'breach-check' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-gradient"></span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('sap-integration')}
+              className={`relative pb-3 px-4 text-sm font-medium ${
+                activeTab === 'sap-integration'
+                  ? 'text-text-accent'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              SAP Integration
+              {activeTab === 'sap-integration' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-gradient"></span>
               )}
             </button>
@@ -420,6 +395,9 @@ export default function SettingsPage() {
 
         {/* Breach Check Tab */}
         {activeTab === 'breach-check' && <BreachCheck />}
+
+        {/* SAP Integration Tab */}
+        {activeTab === 'sap-integration' && <SAPSettings />}
 
         {/* Danger Zone Tab */}
         {activeTab === 'danger-zone' && (
