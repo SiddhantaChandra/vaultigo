@@ -1,6 +1,5 @@
 'use client';
 
-// Define the base URL for the API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
@@ -29,13 +28,12 @@ export async function checkPhishingEmail(emailSender, emailBody) {
 
     const data = await response.json();
 
-    // Map the API response to a standardized format
     return {
       status: data.status,
-      threatLevel: data.status, // 'good', 'sus', or 'bad'
+      threatLevel: data.status, // good, sus, bad
       susWords: data.suswords || [],
       isPhishing: data.status === 'sus' || data.status === 'bad',
-      rawResponse: data, // Include the raw response for debugging
+      rawResponse: data,
     };
   } catch (error) {
     console.error('Error in checkPhishingEmail:', error);
@@ -64,7 +62,7 @@ export function getThreatLevelDescription(threatLevel) {
 /**
  * Get safety recommendations based on threat level
  * @param {string} threatLevel - The threat level ('good', 'sus', 'bad')
- * @returns {string[]} - Array of safety recommendations
+ * @returns {string[]}
  */
 export function getSafetyRecommendations(threatLevel) {
   const baseRecommendations = [

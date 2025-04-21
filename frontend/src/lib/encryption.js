@@ -3,16 +3,14 @@
 
 import CryptoJS from 'crypto-js';
 
-// Constants
 const VERIFICATION_TEXT = 'vaultigo-verify-me';
 const SALT_BYTES = 16;
-const PBKDF2_ITERATIONS = 100000; // High iteration count for security
-const KEY_SIZE = 256 / 32; // 256 bits in words
+const PBKDF2_ITERATIONS = 100000;
+const KEY_SIZE = 256 / 32;
 
-// Generate a random salt
 export function generateSalt() {
   if (typeof window === 'undefined') {
-    return ''; // Server-side placeholder
+    return '';
   }
 
   const array = new Uint8Array(SALT_BYTES);
@@ -22,15 +20,12 @@ export function generateSalt() {
   );
 }
 
-// Derive encryption key from master password using PBKDF2
 export async function deriveKeyFromPassword(password, salt) {
   if (typeof window === 'undefined') {
-    return ''; // Server-side placeholder
+    return '';
   }
 
   try {
-    // PBKDF2 is a password-based key derivation function
-    // It's slower than plain hashing, which is good for security
     const key = CryptoJS.PBKDF2(password, salt, {
       keySize: KEY_SIZE,
       iterations: PBKDF2_ITERATIONS,
@@ -48,7 +43,6 @@ export async function deriveKeyFromPassword(password, salt) {
 // Create verification blob to verify master password
 export function createVerificationBlob(derivedKey) {
   try {
-    // Encrypt a known text with the derived key
     const encrypted = CryptoJS.AES.encrypt(
       VERIFICATION_TEXT,
       derivedKey,
@@ -64,13 +58,11 @@ export function createVerificationBlob(derivedKey) {
 // Verify the master password
 export function verifyMasterPassword(derivedKey, verificationBlob) {
   try {
-    // Try to decrypt the verification blob
     const decrypted = CryptoJS.AES.decrypt(
       verificationBlob,
       derivedKey,
     ).toString(CryptoJS.enc.Utf8);
 
-    // Check if the decrypted text matches the verification text
     return decrypted === VERIFICATION_TEXT;
   } catch (error) {
     console.error('Error verifying master password:', error);
@@ -101,8 +93,6 @@ export function decryptPasswordEntry(encryptedData, derivedKey) {
   }
 }
 
-// Store the derived key in memory
-// Warning: This is kept in memory only while the app is running
 let currentDerivedKey = null;
 
 // Set the current derived key
@@ -120,7 +110,6 @@ export function clearDerivedKey() {
   currentDerivedKey = null;
 }
 
-// For compatibility with the rest of your code
 export async function initArgon2() {
-  return true; // We're not using Argon2 anymore
+  return true;
 }

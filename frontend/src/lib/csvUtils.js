@@ -131,10 +131,9 @@ export function createPasswordCsv(passwordEntries) {
   const csvRows = [
     headers.join(','),
     ...passwordEntries.map((entry) => {
-      // Escape fields properly
       const escapedFields = [
         escapeCsvField(entry.website || ''),
-        escapeCsvField(entry.website || ''), // URL same as website for simplicity
+        escapeCsvField(entry.website || ''),
         escapeCsvField(entry.username || ''),
         escapeCsvField(entry.password || ''),
         escapeCsvField(entry.notes || ''),
@@ -153,7 +152,6 @@ export function createPasswordCsv(passwordEntries) {
  * @returns {string} Escaped field
  */
 function escapeCsvField(field) {
-  // If field contains commas, quotes, or newlines, wrap in quotes and escape quotes
   if (/[",\n\r]/.test(field)) {
     return `"${field.replace(/"/g, '""')}"`;
   }

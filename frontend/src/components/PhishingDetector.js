@@ -23,15 +23,12 @@ export default function PhishingDetector() {
   const [showExamples, setShowExamples] = useState(false);
   const [userId, setUserId] = useState(null);
 
-  // Initialize user ID and fetch scan history
   useEffect(() => {
     const initializeUser = async () => {
-      // Get the user ID
       const userIdentifier = getAnonymousId();
       if (userIdentifier) {
         setUserId(userIdentifier);
 
-        // Fetch scan history for this user
         try {
           const scans = await getPhishingScans(userIdentifier);
           setHistory(scans);
@@ -51,7 +48,6 @@ export default function PhishingDetector() {
     setResult(null);
 
     try {
-      // Call the phishing detection API through our Supabase client
       const phishingResult = await checkPhishingEmail(emailSender, emailBody);
 
       // Process the result
@@ -61,7 +57,6 @@ export default function PhishingDetector() {
         susWords: phishingResult.susWords,
       });
 
-      // Save scan result if we have a user ID
       if (userId) {
         const scanData = {
           emailSender,
@@ -73,7 +68,6 @@ export default function PhishingDetector() {
 
         await savePhishingScan(userId, scanData);
 
-        // Update the history
         const updatedHistory = await getPhishingScans(userId);
         setHistory(updatedHistory);
       }
@@ -108,7 +102,6 @@ export default function PhishingDetector() {
     return <span>Unknown</span>;
   };
 
-  // Sample phishing examples
   const phishingExamples = [
     {
       name: 'Bank Account Alert',

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import ImportExportPasswords from '@/components/ImportExportPasswords';
+import BreachCheck from '@/components/BreachCheck';
 import { getAnonymousId } from '@/lib/supabase';
 import { getDerivedKey, clearDerivedKey } from '@/lib/encryption';
 
@@ -12,6 +13,7 @@ export default function SettingsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState(null);
+  const [activeTab, setActiveTab] = useState('account');
 
   useEffect(() => {
     // Check if user is authenticated
@@ -74,47 +76,107 @@ export default function SettingsPage() {
       <div>
         <h1>Settings</h1>
 
-        <section>
-          <h2>Account</h2>
-          <p>
-            User ID: {userId ? userId.substring(0, 8) + '...' : 'Not logged in'}
-          </p>
+        {/* Tab Navigation */}
+        <div>
+          <button
+            onClick={() => setActiveTab('account')}
+            disabled={activeTab === 'account'}
+          >
+            Account
+          </button>
+          <button
+            onClick={() => setActiveTab('security')}
+            disabled={activeTab === 'security'}
+          >
+            Security
+          </button>
+          <button
+            onClick={() => setActiveTab('import-export')}
+            disabled={activeTab === 'import-export'}
+          >
+            Import & Export
+          </button>
+          <button
+            onClick={() => setActiveTab('breach-check')}
+            disabled={activeTab === 'breach-check'}
+          >
+            Breach Check
+          </button>
+          <button
+            onClick={() => setActiveTab('danger-zone')}
+            disabled={activeTab === 'danger-zone'}
+          >
+            Danger Zone
+          </button>
+        </div>
 
-          <div>
-            <button onClick={handleLogout}>Logout</button>
-          </div>
-        </section>
-
-        <section>
-          <h2>Security</h2>
-          <div>
-            <h3>Change Master Password</h3>
+        {/* Account Tab */}
+        {activeTab === 'account' && (
+          <section>
+            <h2>Account</h2>
             <p>
-              Changing your master password will re-encrypt all your stored
-              passwords.
+              User ID:{' '}
+              {userId ? userId.substring(0, 8) + '...' : 'Not logged in'}
             </p>
-            <button
-              onClick={() => alert('This feature is not yet implemented.')}
-            >
-              Change Master Password
-            </button>
-          </div>
-        </section>
 
-        {/* Add our new Import/Export component */}
-        <ImportExportPasswords />
+            <div>
+              <button onClick={handleLogout}>Logout</button>
+            </div>
+          </section>
+        )}
 
-        <section>
-          <h2>Danger Zone</h2>
-          <div>
-            <h3>Delete Account</h3>
-            <p>
-              This will permanently delete all your saved passwords and account
-              data.
-            </p>
-            <button onClick={handleDeleteAccount}>Delete Account</button>
-          </div>
-        </section>
+        {/* Security Tab */}
+        {activeTab === 'security' && (
+          <section>
+            <h2>Security</h2>
+            <div>
+              <h3>Change Master Password</h3>
+              <p>
+                Changing your master password will re-encrypt all your stored
+                passwords.
+              </p>
+              <button
+                onClick={() => alert('This feature is not yet implemented.')}
+              >
+                Change Master Password
+              </button>
+            </div>
+
+            <div>
+              <h3>Password Generator Settings</h3>
+              <p>
+                Customize how passwords are generated when using the password
+                generator.
+              </p>
+              <button
+                onClick={() => alert('This feature is not yet implemented.')}
+              >
+                Configure Generator
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* Import/Export Tab */}
+        {activeTab === 'import-export' && <ImportExportPasswords />}
+
+        {/* Breach Check Tab */}
+        {activeTab === 'breach-check' && <BreachCheck />}
+
+        {/* Danger Zone Tab */}
+        {activeTab === 'danger-zone' && (
+          <section>
+            <h2>Danger Zone</h2>
+            <div>
+              <h3>Delete Account</h3>
+              <p>
+                This will permanently delete all your saved passwords and
+                account data. This action cannot be undone.
+              </p>
+              <button onClick={handleDeleteAccount}>Delete Account</button>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

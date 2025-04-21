@@ -1,3 +1,5 @@
+import '@/styles/globals.css';
+
 export const metadata = {
   title: 'Vaultigo Password Manager',
   description: 'Secure client-side encrypted password manager',
